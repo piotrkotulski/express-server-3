@@ -17,13 +17,19 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
     const { day, seat, client, email } = req.body;
+
     if (!day || !seat || !client || !email) {
-        res.status(400).json({ message: 'All fields are required' });
-    } else {
-        const newSeat = { id: db.seats.length + 1, day, seat, client, email };
-        db.seats.push(newSeat);
-        res.json({ message: 'OK' });
+        return res.status(400).json({ message: 'All fields are required' });
     }
+
+    const isSeatTaken = db.seats.some(s => s.day === day && s.seat === seat);
+    if (isSeatTaken) {
+        return res.status(409).json({ message: 'The slot is already taken...' });
+    }
+
+    const newSeat = { id: db.seats.length + 1, day, seat, client, email };
+    db.seats.push(newSeat);
+    res.json({ message: 'OK' });
 });
 
 router.put('/:id', (req, res) => {
